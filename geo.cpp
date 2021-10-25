@@ -11,7 +11,7 @@ const int SCREEN_WIDTH = 540;
 const int SCREEN_HEIGHT = 420;
 
 const int NUM_OF_BLOCKS = 6;
-const int NUM_OF_BOXES = 1;
+const int NUM_OF_BOXES = 2;
 
 int player_w = 60; // this is used for default size for all the block and boxes
 int player_h = 60;
@@ -21,16 +21,24 @@ int player_y = 360;
 int blocks[NUM_OF_BLOCKS][2] = 
 { 
 	{240, SCREEN_HEIGHT - player_w}, 
-	{240, SCREEN_HEIGHT - (player_w * 2)},
+	//{240, SCREEN_HEIGHT - (player_w * 2)},
 	{240, SCREEN_HEIGHT - (player_w * 3)},
 	{240, SCREEN_HEIGHT - (player_w * 4)},
 	{0, player_w * 2},
 	{0 + player_w, player_w * 2},
+	{0 + player_w * 2, player_w * 2},
 };
 
 int boxes[NUM_OF_BOXES][2] = 
 {
-	{player_w, player_w}
+	{player_w, player_w},
+	{player_w * 6, player_w * 2}
+};
+
+int objective[NUM_OF_BOXES][2] = 
+{
+	{player_w * 2, player_w * 5},
+	{0, 0}
 };
 //starts up sdl an dcreates window
 bool init();
@@ -166,6 +174,20 @@ int* check_to_push(int x, int y) {
 	return 0;
 }
 
+bool check_win() {
+	int count = 0;
+	for (int i = 0; i < NUM_OF_BOXES; i++) {
+		for (int j = 0; j < NUM_OF_BOXES; j++) {
+			if (boxes[i][0] == objective[j][0] && boxes[i][1] == objective[j][1]) { 
+				count++; 
+				break; 
+			}
+		}
+		if (count == NUM_OF_BOXES) return 1;		
+	}
+	return 0;
+}
+
 int main (int argc, char* args[]) {
 	int* box_cords;	
 
@@ -182,6 +204,11 @@ int main (int argc, char* args[]) {
 			SDL_Event e;
 
 			while (!quit) {
+				if (check_win()) {
+					SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION,
+											"You Win!","You Win Dumbass!", NULL);
+					break;
+				}
 				while (SDL_PollEvent( &e ) != 0) {
 					if( e.type == SDL_QUIT ) { quit = true; }
 
@@ -189,9 +216,9 @@ int main (int argc, char* args[]) {
 						switch( e.key.keysym.sym ) {
 							case SDLK_w:
 								if (box_cords = check_to_push(0, -1)) {
-									if (check_collision( boxes[*(box_cords + 2)][0], boxes[*(box_cords + 2)][1], 0, -1)
-										&& ( boxes[*(box_cords + 2)][1] + player_w > 0 - player_w ) ) {
-										boxes[*(box_cords + 2)][1] -= player_w;
+									if ( check_collision( boxes[box_cords[2]][0], boxes[box_cords[2]][1], 0, -1 )
+										&& ( boxes[box_cords[2]][1] - player_w > 0 - player_w ) ) {
+										boxes[box_cords[2]][1] -= player_w;
 										player_y -= player_w;
 									}
 								}
@@ -202,9 +229,9 @@ int main (int argc, char* args[]) {
 
 							case SDLK_s:
 								if (box_cords = check_to_push(0, 1)) {
-									if (check_collision( boxes[*(box_cords + 2)][0], boxes[*(box_cords + 2)][1], 0, 1)
-										&& ( boxes[*(box_cords + 2)][1] + player_w < SCREEN_HEIGHT ) ) {
-										boxes[*(box_cords + 2)][1] += player_w;
+									if (check_collision( boxes[box_cords[2]][0], boxes[box_cords[2]][1], 0, 1)
+										&& ( boxes[box_cords[2]][1] + player_w < SCREEN_HEIGHT ) ) {
+										boxes[box_cords[2]][1] += player_w;
 										player_y += player_w;
 									}
 								}
@@ -215,7 +242,7 @@ int main (int argc, char* args[]) {
 							  
 							case SDLK_d:
 								if (box_cords = check_to_push(1, 0)) {
-									if (check_collision( boxes[*(box_cords + 2)][0], boxes[*(box_cords + 2)][1], 1, 0)
+									if (check_collision( boxes[box_cords[2]][0], boxes[box_cords[2]][1], 1, 0)
 										&& ( boxes[*(box_cords + 2)][0] + player_w < SCREEN_WIDTH) ) {
 										boxes[*(box_cords + 2)][0] += player_w;
 										player_x += player_w;
@@ -228,7 +255,7 @@ int main (int argc, char* args[]) {
 
 							case SDLK_a:
 								if (box_cords = check_to_push(-1, 0)) {
-									if ( check_collision( boxes[*(box_cords + 2)][0], boxes[*(box_cords + 2)][1], -1, 0 )
+									if ( check_collision(boxes[box_cords[2]][0], boxes[box_cords[2]][1], -1, 0 )
 										&& ( boxes[*(box_cords + 2)][0] - player_w > 0 - player_w) ) {
 										boxes[*(box_cords + 2)][0] -= player_w;
 										player_x -= player_w;
@@ -269,6 +296,12 @@ int main (int argc, char* args[]) {
 					SDL_RenderFillRect( g_renderer, &box_rect );
 				}
 
+				// Objective
+				for (int i = 0; i < NUM_OF_BOXES; i++) {
+					SDL_Rect objective_outline = { objective[i][0], objective[i][1], player_w, player_h };
+					SDL_SetRenderDrawColor( g_renderer, 0x6b, 0xff, 0x21, 0x00 );
+					SDL_RenderDrawRect( g_renderer, &objective_outline );
+				}
 				// Update screen
 				SDL_RenderPresent( g_renderer );
 			}
