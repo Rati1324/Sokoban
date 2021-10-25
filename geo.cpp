@@ -143,11 +143,11 @@ int* random_pos() {
 }
 
 // Check collision
-bool check_collision(int x, int y) {
+bool check_collision(int object_x, int object_y, int branch_x, int branch_y) {
 	bool good = 1;
 	for (int i = 0; i < NUM_OF_BLOCKS; i++) {
 		// Branchless programming for some reason
-		if (player_x + player_w * x == blocks[i][0] && player_y + (player_w * y) == blocks[i][1]) { good = 0; }
+		if (object_x + (player_w * branch_x) == blocks[i][0] && object_y + (player_w * branch_y) == blocks[i][1]) { good = 0; }
 	}
 	return good;
 }
@@ -189,40 +189,52 @@ int main (int argc, char* args[]) {
 						switch( e.key.keysym.sym ) {
 							case SDLK_w:
 								if (box_cords = check_to_push(0, -1)) {
-									boxes[*(box_cords + 2)][1] -= player_w;
-									player_y -= player_w;
+									if (check_collision( boxes[*(box_cords + 2)][0], boxes[*(box_cords + 2)][1], 0, -1)
+										&& ( boxes[*(box_cords + 2)][1] + player_w > 0 - player_w ) ) {
+										boxes[*(box_cords + 2)][1] -= player_w;
+										player_y -= player_w;
+									}
 								}
-								else if (player_y > 0 && check_collision(0, -1)) {
+								else if (player_y > 0 && check_collision(player_x, player_y, 0, -1)) {
 									player_y -= player_w; 
 								}
 								break;
 
 							case SDLK_s:
 								if (box_cords = check_to_push(0, 1)) {
-									boxes[*(box_cords + 2)][1] += player_w;
-									player_y += player_w;
+									if (check_collision( boxes[*(box_cords + 2)][0], boxes[*(box_cords + 2)][1], 0, 1)
+										&& ( boxes[*(box_cords + 2)][1] + player_w < SCREEN_HEIGHT ) ) {
+										boxes[*(box_cords + 2)][1] += player_w;
+										player_y += player_w;
+									}
 								}
-								else if (player_y + player_w < SCREEN_HEIGHT && check_collision(0, 1)) {
+								else if (player_y + player_w < SCREEN_HEIGHT && check_collision(player_x, player_y, 0, 1)) {
 									player_y += player_w; 
 								}
 								break;
 							  
 							case SDLK_d:
 								if (box_cords = check_to_push(1, 0)) {
-									boxes[*(box_cords + 2)][0] += player_w;
-									player_x += player_w;
+									if (check_collision( boxes[*(box_cords + 2)][0], boxes[*(box_cords + 2)][1], 1, 0)
+										&& ( boxes[*(box_cords + 2)][0] + player_w < SCREEN_WIDTH) ) {
+										boxes[*(box_cords + 2)][0] += player_w;
+										player_x += player_w;
+									}
 								}
-								else if (player_x + player_w < SCREEN_WIDTH && check_collision(1, 0)) {
+								else if (player_x + player_w < SCREEN_WIDTH && check_collision(player_x, player_y, 1, 0)) {
 									player_x += player_w; 
 								}
 								break;
 
 							case SDLK_a:
 								if (box_cords = check_to_push(-1, 0)) {
-									boxes[*(box_cords + 2)][0] -= player_w;
-									player_x -= player_w;
+									if ( check_collision( boxes[*(box_cords + 2)][0], boxes[*(box_cords + 2)][1], -1, 0 )
+										&& ( boxes[*(box_cords + 2)][0] - player_w > 0 - player_w) ) {
+										boxes[*(box_cords + 2)][0] -= player_w;
+										player_x -= player_w;
+									}
 								}
-								else if (player_x > 0 && check_collision(-1, 0)) {
+								else if (player_x > 0 && check_collision(player_x, player_y, -1, 0)) {
 									player_x -= player_w; 
 								}
 								break;
