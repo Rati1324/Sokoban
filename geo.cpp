@@ -38,7 +38,7 @@ int boxes[NUM_OF_BOXES][2] =
 int objective[NUM_OF_BOXES][2] = 
 {
 	{player_w * 2, player_w * 5},
-	{0, 0}
+	{0, player_w * 4}
 };
 //starts up sdl an dcreates window
 bool init();
